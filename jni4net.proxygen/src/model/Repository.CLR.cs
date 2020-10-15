@@ -410,6 +410,9 @@ namespace net.sf.jni4net.proxygen.model
                 res.Name = method.Name;
             }
 
+            if (res.JVMName.Length > 1)
+                res.JVMName = char.ToLower(res.JVMName[0]) + res.JVMName.Substring(1);
+
             if (method.DeclaringType != type.CLRType)
             {
                 res.DeclaringType = RegisterType(method.DeclaringType);

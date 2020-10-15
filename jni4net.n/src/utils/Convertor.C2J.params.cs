@@ -189,6 +189,12 @@ namespace net.sf.jni4net.utils
             return res;
         }
 
+        public static Value ParArrayPrimC2J(JNIEnv env, IntPtr[] value)
+        {
+            var res = new Value { _object = ArrayPrimC2J(env, value) };
+            return res;
+        }
+
         #endregion
     }
 }
