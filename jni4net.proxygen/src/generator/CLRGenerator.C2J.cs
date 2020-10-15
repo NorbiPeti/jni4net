@@ -136,6 +136,8 @@ namespace net.sf.jni4net.proxygen.generator
             {
                 GType parameter = method.Parameters[i];
                 string paramName = method.ParameterNames[i];
+                if (method.IsProperty)
+                    paramName = "value";
                 CodeExpression invokeExpression = new CodeVariableReferenceExpression(paramName);
                 CodeMethodInvokeExpression conversionExpression = CreateConversionExpressionC2JParam(parameter, invokeExpression);
                 expressions[i + offset] = conversionExpression;
@@ -209,6 +211,14 @@ namespace net.sf.jni4net.proxygen.generator
 
         private void GenerateGetEnvC2J(GMethod method, CodeStatementCollection tgtStatements)
         {
+            for (int i = 0; i < method.Parameters.Count; i++)
+            {
+                GType param = method.Parameters[i];
+                if (param.IsOut)
+                    tgtStatements.Add(new CodeAssignStatement(new CodeArgumentReferenceExpression(method.ParameterNames[i]),
+                        new CodeDefaultValueExpression(new CodeTypeReference(param.CLRType.GetElementType()))));
+            } //TODO: Assign actual values
+
             if (method.IsStatic || method.IsConstructor)
             {
                 CodeStatement statement =

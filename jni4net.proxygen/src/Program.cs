@@ -40,8 +40,10 @@ namespace net.sf.jni4net.proxygen
         private static string lib;
         internal static int Main(string[] args)
         {
+#if RELEASE
             try
             {
+#endif
                 Console.WriteLine("jni4net.proxygen - Copyright (C) 2009 Pavel Savara - licensed under GPLv3");
 
                 Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-US");
@@ -65,7 +67,8 @@ namespace net.sf.jni4net.proxygen
                 currentDomain.AssemblyResolve += AssemblyResolve;
 
                 return Work(args);
-            }
+#if RELEASE
+        }
             catch (Exception ex)
             {
                 if (ex is SecurityException || ex is TypeInitializationException)
@@ -77,6 +80,7 @@ namespace net.sf.jni4net.proxygen
                 Console.Error.Write(ex.ToString());
                 return -1;
             }
+#endif
         }
 
         static Assembly AssemblyResolve(object sender, ResolveEventArgs args)

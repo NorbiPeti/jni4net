@@ -316,7 +316,7 @@ namespace net.sf.jni4net.proxygen.generator
                 {
                     var member = m as CodeMemberPropertyEx;
                     if (member != null)
-                        if (member.Getter == method || member.Setter == method)
+                        if (member.Name == tgtProperty.Name)
                         {
                             tgtProperty = member;
                             add = false;
@@ -390,8 +390,11 @@ namespace net.sf.jni4net.proxygen.generator
             for (int i = 0; i < method.Parameters.Count; i++)
             {
                 var tgtParameter = new CodeParameterDeclarationExpression();
+                var param = method.Parameters[i];
                 tgtParameter.Name = method.ParameterNames[i];
-                tgtParameter.Type = method.Parameters[i].CLRInterfaceParameterReference;
+                tgtParameter.Type = param.CLRInterfaceParameterReference;
+                tgtParameter.Direction = param.IsOut ? FieldDirection.Out
+                    : param.IsRef ? FieldDirection.Ref : FieldDirection.In;
                 tgtMethod.Parameters.Add(tgtParameter);
             }
         }

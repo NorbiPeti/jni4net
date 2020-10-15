@@ -481,7 +481,7 @@ namespace net.sf.jni4net.proxygen.model
                 }
                 // we ignore IsOut when IsIn is set as well, because they are probably just attributes
                 // see System.IO.TextReader.Read([In, Out] char[] buffer, int index, int count)
-                if (info.IsOut && !info.IsIn)
+                if (info.IsOut && !info.IsIn && parameterType != typeof(IntPtr))
                 {
                     //this is trick how to store out as type
                     parameterType = parameterType.GetElementType().MakePointerType();
