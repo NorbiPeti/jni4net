@@ -142,6 +142,21 @@ namespace net.sf.jni4net.utils
             return res;
         }
 
+        public static JniLocalHandle ArrayPrimC2J(JNIEnv env, uint[] value)
+        {
+            if (value == null)
+            {
+                return JniLocalHandle.Zero;
+            }
+            int length = value.Length;
+            JniLocalHandle res = env.NewIntArrayPtr(length);
+            int[] val = new int[value.Length];
+            for (int i = 0; i < value.Length; i++)
+                val[i] = (int)value[i];
+            env.SetIntArrayRegion(res, 0, length, val);
+            return res;
+        }
+
         public static JniLocalHandle ArrayPrimC2J(JNIEnv env, long[] value)
         {
             if (value == null)

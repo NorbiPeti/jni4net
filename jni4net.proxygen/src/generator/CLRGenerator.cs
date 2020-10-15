@@ -563,8 +563,10 @@ namespace net.sf.jni4net.proxygen.generator
         private CodeMethodInvokeExpression CEEC2J(string prefix, GType paramType, CodeExpression invokeExpression)
         {
             CodeTypeReference[] par;
-            if (paramType.IsArray)
+            if (paramType.IsArray || paramType.IsOut || paramType.IsRef)
             {
+                if (!paramType.IsArray)
+                    paramType = paramType.MakeArray();
                 GType element = paramType.ArrayElement;
                 if (element.IsPrimitive)
                 {
@@ -578,7 +580,7 @@ namespace net.sf.jni4net.proxygen.generator
                 }
                 if (!element.IsInterface && !element.IsCLRRootType && element.IsCLRRealType)
                 {
-                    par = new[] {paramType.CLRReference, paramType.ArrayElement.CLRReference};
+                    par = new[] {paramType.CLRReference, element.CLRReference};
                     return CCE(prefix + "ArrayStrongC2Jp", par, invokeExpression, true);
                 }
                 if (!element.IsInterface && !element.IsJVMRootType && element.IsJVMRealType)
@@ -586,7 +588,7 @@ namespace net.sf.jni4net.proxygen.generator
                     par = new CodeTypeReference[] {};
                     return CCE(prefix + "ArrayStrongCp2J", par, invokeExpression, true);
                 }
-                par = new[] {paramType.CLRReference, paramType.ArrayElement.CLRReference};
+                par = new[] {paramType.CLRReference, element.CLRReference};
                 return CCE(prefix + "ArrayFullC2J", par, invokeExpression, true);
             }
             if (paramType.IsPrimitive)

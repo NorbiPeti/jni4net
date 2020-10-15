@@ -403,7 +403,8 @@ namespace net.sf.jni4net.proxygen.model
         {
             if (IsCLRType)
             {
-                GType array = Repository.RegisterType(CLRType.MakeArrayType());
+                var type = IsOut || IsRef ? CLRType.GetElementType() : CLRType;
+                GType array = Repository.RegisterType(type.MakeArrayType());
                 array.ArrayElement = this;
                 return array;
             }
