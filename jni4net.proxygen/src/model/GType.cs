@@ -349,6 +349,11 @@ namespace net.sf.jni4net.proxygen.model
                     }
                 }
             }
+            if (typeof(Enum).IsAssignableFrom(CLRType) && typeof(Enum) != CLRType && !(JVMNamespace?.EndsWith("_FixIt") ?? true))
+            {
+                JVMNamespace += "_FixIt";
+                CLRNamespace += "_FixIt";
+            }
             JVMNamespaceExt = JVMNamespace;
             CLRNamespaceExt = CLRNamespace;
             if (JVMNamespace.StartsWith("java."))
