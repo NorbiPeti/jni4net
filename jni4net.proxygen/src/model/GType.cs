@@ -108,7 +108,14 @@ namespace net.sf.jni4net.proxygen.model
 
         public string JVMResolved
         {
-            get { return JVMSubst == null ? JVMFullName : JVMSubst.JVMFullName; }
+            get
+            {
+                /*var typeToCheck = JVMSubst ?? this;
+                if (typeof(Enum).IsAssignableFrom(typeToCheck.CLRType) && typeof(Enum) != typeToCheck.CLRType
+                    && !(typeToCheck.JVMFullName?.EndsWith("_FixIt") ?? true))
+                    typeToCheck.JVMFullName += "_FixIt";*/
+                return JVMSubst == null ? JVMFullName : JVMSubst.JVMFullName;
+            }
         }
 
         public CodeTypeReference JVMReference
@@ -327,6 +334,10 @@ namespace net.sf.jni4net.proxygen.model
                     }
                     else
                     {
+                        if (typeof(Enum).IsAssignableFrom(CLRType) && typeof(Enum) != CLRType && !(Name?.EndsWith("_FixIt") ?? true))
+                        {
+                            JVMNamespace += "_FixIt";
+                        }
                         JVMFullName = JVMNamespace + "." + CLRType.Name;
                     }
                 }
@@ -349,11 +360,13 @@ namespace net.sf.jni4net.proxygen.model
                     }
                 }
             }
-            if (typeof(Enum).IsAssignableFrom(CLRType) && typeof(Enum) != CLRType && !(JVMNamespace?.EndsWith("_FixIt") ?? true))
+            /*if (typeof(Enum).IsAssignableFrom(CLRType) && typeof(Enum) != CLRType && !(Name?.EndsWith("_FixIt") ?? true))
             {
-                JVMNamespace += "_FixIt";
-                CLRNamespace += "_FixIt";
-            }
+                if (JVMSubst == null)
+                    JVMSubst = new GType { Name = Name + "_FixIt", JVMNamespace = JVMNamespace, JVMFullName = JVMNamespace + "." + Name + "_FixIt" };
+                else
+                    JVMSubst.Name += "_FixIt";
+            }*/
             JVMNamespaceExt = JVMNamespace;
             CLRNamespaceExt = CLRNamespace;
             if (JVMNamespace.StartsWith("java."))

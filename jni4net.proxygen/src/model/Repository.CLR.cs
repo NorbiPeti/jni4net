@@ -67,11 +67,6 @@ namespace net.sf.jni4net.proxygen.model
                 {
                     known.Registration = registration;
                 }
-                if (typeof(Enum).IsAssignableFrom(known.CLRType) && typeof(Enum) != known.CLRType && !(known.JVMNamespace?.EndsWith("_FixIt") ?? true))
-                {
-                    known.JVMNamespace += "_FixIt";
-                    known.CLRNamespace += "_FixIt";
-                }
                 return known;
             }
             var res = new GType();
@@ -174,11 +169,6 @@ namespace net.sf.jni4net.proxygen.model
                 }
             }
 
-            if (typeof(Enum).IsAssignableFrom(type) && typeof(Enum) != type && !(res.JVMNamespace?.EndsWith("_FixIt") ?? true))
-            {
-                res.JVMNamespace += "_FixIt";
-                res.CLRNamespace += "_FixIt";
-            }
             Register(res);
 
             if (type.IsGenericType)
@@ -426,7 +416,7 @@ namespace net.sf.jni4net.proxygen.model
             if (res.JVMName.Length > 1)
                 res.JVMName = char.ToLower(res.JVMName[0]) + res.JVMName.Substring(1);
             bool isItProblematic = false;
-            Predicate<Type> hasProblmeaticType = t => t == typeof(Array) || typeof(Enum).IsAssignableFrom(t);
+            Predicate<Type> hasProblmeaticType = t => t == typeof(Array) || typeof(Enum).IsAssignableFrom(t) && typeof(Enum) != t;
             if (hasProblmeaticType(method.ReturnType))
                 isItProblematic = true;
             foreach (var parameter in method.GetParameters())
@@ -440,14 +430,13 @@ namespace net.sf.jni4net.proxygen.model
                 res.DeclaringType = RegisterType(method.DeclaringType);
             }
 
-            {
+            /*{
                 var tt = res.DeclaringType ?? type;
-                if (typeof(Enum).IsAssignableFrom(method.DeclaringType) && typeof(Enum) != method.DeclaringType && !(tt.JVMNamespace?.EndsWith("_FixIt") ?? true))
+                if (typeof(Enum).IsAssignableFrom(method.DeclaringType) && typeof(Enum) != method.DeclaringType && !(tt.JVMFullName?.EndsWith("_FixIt") ?? true))
                 {
-                    tt.JVMNamespace += "_FixIt";
-                    tt.CLRNamespace += "_FixIt";
+                    tt.JVMFullName += "_FixIt";
                 }
-            }
+            }*/
 
             res.ReturnType = RegisterType(method.ReturnType);
             if (register)

@@ -77,13 +77,6 @@ namespace net.sf.jni4net.proxygen.generator
         /// </summary>
         private string GenerateNamespace()
         {
-            if (type.CLRType.IsEnum && typeof(Enum) != type.CLRType && (!(type.JVMNamespace?.EndsWith("_FixIt") ?? true)
-                || !(type.CLRNamespace?.EndsWith("_FixIt") ?? true)))
-            {
-                type.JVMNamespace += "_FixIt";
-                type.CLRNamespace += "_FixIt";
-            }
-
             var sb = new StringBuilder();
             var buffer = new StringWriter(sb);
 
