@@ -338,9 +338,21 @@ namespace net.sf.jni4net.utils
                 {
                     res = classLoader.loadClass(name);
                 }
-                catch (Throwable th)
+                catch(Throwable th)
                 {
-                    throw new JNIException("Can't load java class for " + name + " from classLoader " + classLoader, th);
+                    try
+                    {
+                        int lastDot = name.LastIndexOf('.');
+                        if (lastDot == -1)
+                            throw th;
+                        string package = name.Substring(0, lastDot);
+                        string clname = name.Substring(lastDot + 1);
+                        res = classLoader.loadClass(package + "_FixIt." + clname);
+                    }
+                    catch(Throwable th2)
+                    {
+                        throw new JNIException("Can't load java class for " + name + " from classLoader " + classLoader, th2);
+                    }
                 }
             }
             
@@ -367,6 +379,7 @@ namespace net.sf.jni4net.utils
             {
                 return;
             }
+            Console.WriteLine("The type " + proxyType + " has a Java proxy attribute");
 
             Type interfaceType = javaProxyAttribute.InterfaceType;
             if (interfaceType == null)
@@ -386,6 +399,7 @@ namespace net.sf.jni4net.utils
             {
                 return;
             }
+            Console.WriteLine("The type " + proxyType + " has a Java class attribute");
 
             RegisterProxy(proxyType, proxyType, ref record);
             record.IsJVMClass = true;
@@ -428,6 +442,7 @@ namespace net.sf.jni4net.utils
             {
                 return;
             }
+            Console.WriteLine("The type " + wrapperType + " has a wrapper attribute");
 
             Type interfaceType = wrapperAttribute.InterfaceType;
             if (record == null)
