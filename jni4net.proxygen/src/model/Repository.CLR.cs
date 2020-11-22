@@ -25,7 +25,6 @@ using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using net.sf.jni4net.proxygen.config;
 using String = java.lang.String;
 
@@ -138,7 +137,6 @@ namespace net.sf.jni4net.proxygen.model
             {
                 res.IsCLRRealType = true;
             }
-
             if (type.BaseType != null && res.Base == null
                 && type != typeof (object)
                 && type != typeof (Exception)
@@ -168,7 +166,6 @@ namespace net.sf.jni4net.proxygen.model
                     }
                 }
             }
-
             Register(res);
 
             if (type.IsGenericType)
@@ -413,31 +410,10 @@ namespace net.sf.jni4net.proxygen.model
                 res.Name = method.Name;
             }
 
-            if (res.JVMName.Length > 1)
-                res.JVMName = char.ToLower(res.JVMName[0]) + res.JVMName.Substring(1);
-            bool isItProblematic = false;
-            Predicate<Type> hasProblmeaticType = t => t == typeof(Array) || typeof(Enum).IsAssignableFrom(t) && typeof(Enum) != t;
-            if (hasProblmeaticType(method.ReturnType))
-                isItProblematic = true;
-            foreach (var parameter in method.GetParameters())
-                if (hasProblmeaticType(parameter.ParameterType))
-                    isItProblematic = true;
-            if (isItProblematic)
-                res.JVMName += "_FixIt";
-
             if (method.DeclaringType != type.CLRType)
             {
                 res.DeclaringType = RegisterType(method.DeclaringType);
             }
-
-            /*{
-                var tt = res.DeclaringType ?? type;
-                if (typeof(Enum).IsAssignableFrom(method.DeclaringType) && typeof(Enum) != method.DeclaringType && !(tt.JVMFullName?.EndsWith("_FixIt") ?? true))
-                {
-                    tt.JVMFullName += "_FixIt";
-                }
-            }*/
-
             res.ReturnType = RegisterType(method.ReturnType);
             if (register)
             {
@@ -505,7 +481,7 @@ namespace net.sf.jni4net.proxygen.model
                 }
                 // we ignore IsOut when IsIn is set as well, because they are probably just attributes
                 // see System.IO.TextReader.Read([In, Out] char[] buffer, int index, int count)
-                if (info.IsOut && !info.IsIn && parameterType != typeof(IntPtr))
+                if (info.IsOut && !info.IsIn)
                 {
                     //this is trick how to store out as type
                     parameterType = parameterType.GetElementType().MakePointerType();

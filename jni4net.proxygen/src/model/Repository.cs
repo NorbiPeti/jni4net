@@ -194,7 +194,19 @@ namespace net.sf.jni4net.proxygen.model
 
             LoadAssemblies();
 
-            RegisterAssemblies();
+            try
+            {
+                RegisterAssemblies();
+            }
+            catch(ReflectionTypeLoadException e)
+            {
+                Console.WriteLine(e);
+                Console.WriteLine("Loader exceptions: " + e.LoaderExceptions.Length);
+                foreach (var ex in e.LoaderExceptions)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
 
             if (config.JavaClass != null)
             {

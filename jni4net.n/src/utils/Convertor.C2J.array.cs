@@ -142,21 +142,6 @@ namespace net.sf.jni4net.utils
             return res;
         }
 
-        public static JniLocalHandle ArrayPrimC2J(JNIEnv env, uint[] value)
-        {
-            if (value == null)
-            {
-                return JniLocalHandle.Zero;
-            }
-            int length = value.Length;
-            JniLocalHandle res = env.NewIntArrayPtr(length);
-            int[] val = new int[value.Length];
-            for (int i = 0; i < value.Length; i++)
-                val[i] = (int)value[i];
-            env.SetIntArrayRegion(res, 0, length, val);
-            return res;
-        }
-
         public static JniLocalHandle ArrayPrimC2J(JNIEnv env, long[] value)
         {
             if (value == null)
@@ -238,21 +223,6 @@ namespace net.sf.jni4net.utils
             int length = value.Length;
             JniLocalHandle res = env.NewBooleanArrayPtr(length);
             env.SetBooleanArrayRegion(res, 0, length, value);
-            return res;
-        }
-
-        public static JniLocalHandle ArrayPrimC2J(JNIEnv env, IntPtr[] value)
-        {
-            if (value == null)
-            {
-                return JniLocalHandle.Zero;
-            }
-            int length = value.Length;
-            JniLocalHandle res = env.NewLongArrayPtr(length);
-            long[] arr = new long[value.Length];
-            for (int i = 0; i < arr.Length; i++)
-                arr[i] = value[i].ToInt64();
-            env.SetLongArrayRegion(res, 0, length, arr);
             return res;
         }
 

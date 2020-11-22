@@ -57,24 +57,12 @@ namespace net.sf.jni4net.proxygen.generator
         private void CreateMethodC2J(GMethod method, CodeTypeDeclaration tgtType, string uName, bool isProxy, bool fieldSetter)
         {
             CodeStatementCollection tgtStatements = CreateMethodSignature(tgtType, method, isProxy, fieldSetter);
-            GenerateGetEnvC2J(method, tgtStatements, fieldSetter);
+            GenerateGetEnvC2J(method, tgtStatements);
             CodeMethodInvokeExpression invokeExpression = GenerateInvokeExpressionC2J(method, uName, fieldSetter);
             CodeStatement call = GenerateCallStatementC2J(method, invokeExpression, fieldSetter);
 
             tgtStatements.Add(call);
             GenerateEndFrameC2J(tgtStatements);
-
-            //Generate out/ref code
-            for (int i = 0; i < method.Parameters.Count; i++)
-            {
-                var param = method.Parameters[i];
-                if (param.IsOut || param.IsRef)
-                    tgtStatements.Add(new CodeAssignStatement(new CodeArgumentReferenceExpression(method.ParameterNames[i]),
-                    new CodeArrayIndexerExpression(new CodeVariableReferenceExpression(method.ParameterNames[i] + "__Arr"), new CodeSnippetExpression("0"))));
-            }
-            //Add return statement at the end, if needed, when the params have been set
-            if (!(method.IsConstructor || method.IsVoid || fieldSetter))
-                tgtStatements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("retval")));
         }
 
         private void GenerateMethodIdFieldC2J(GMethod method, CodeTypeDeclaration tgtType, string uName)
@@ -107,13 +95,13 @@ namespace net.sf.jni4net.proxygen.generator
                     {
                         invokeExpression = new CodeCastExpression(method.ReturnType.CLRReference, invokeExpression);
                     }
-                    call = new CodeAssignStatement(new CodeVariableReferenceExpression("retval"), invokeExpression);
+                    call = new CodeMethodReturnStatement(invokeExpression);
                 }
                 else
                 {
                     CodeMethodInvokeExpression conversionExpression = CreateConversionExpressionJ2CParam(method.ReturnType,
                                                                                                     invokeExpression);
-                    call = new CodeAssignStatement(new CodeVariableReferenceExpression("retval"), conversionExpression);
+                    call = new CodeMethodReturnStatement(conversionExpression);
                 }
             }
             return call;
@@ -148,10 +136,6 @@ namespace net.sf.jni4net.proxygen.generator
             {
                 GType parameter = method.Parameters[i];
                 string paramName = method.ParameterNames[i];
-                if (method.IsProperty)
-                    paramName = "value";
-                else if (parameter.IsOut || parameter.IsRef)
-                    paramName += "__Arr";
                 CodeExpression invokeExpression = new CodeVariableReferenceExpression(paramName);
                 CodeMethodInvokeExpression conversionExpression = CreateConversionExpressionC2JParam(parameter, invokeExpression);
                 expressions[i + offset] = conversionExpression;
@@ -223,28 +207,8 @@ namespace net.sf.jni4net.proxygen.generator
             return callName.ToString();
         }
 
-        private void GenerateGetEnvC2J(GMethod method, CodeStatementCollection tgtStatements, bool fieldSetter)
+        private void GenerateGetEnvC2J(GMethod method, CodeStatementCollection tgtStatements)
         {
-            for (int i = 0; i < method.Parameters.Count; i++)
-            {
-                GType param = method.Parameters[i];
-                /*if (param.IsOut)
-                    tgtStatements.Add(new CodeAssignStatement(new CodeArgumentReferenceExpression(method.ParameterNames[i]),
-                        new CodeDefaultValueExpression(new CodeTypeReference(param.CLRType.GetElementType(), CodeTypeReferenceOptions.GlobalReference))));*/
-                if (param.IsOut || param.IsRef)
-                {
-                    var typeRef = new CodeTypeReference(param.CLRType.GetElementType(), CodeTypeReferenceOptions.GlobalReference);
-                    var arr = param.IsOut
-                        ? new CodeArrayCreateExpression(typeRef, 1)
-                        : new CodeArrayCreateExpression(typeRef, new CodeArgumentReferenceExpression(method.ParameterNames[i]));
-                    var arrType = new CodeTypeReference(param.CLRType.GetElementType().MakeArrayType(), CodeTypeReferenceOptions.GlobalReference)
-                    {
-                        ArrayElementType = typeRef
-                    };
-                    tgtStatements.Add(new CodeVariableDeclarationStatement(arrType, method.ParameterNames[i] + "__Arr", arr));
-                }
-            } //TODO: Assign actual values
-
             if (method.IsStatic || method.IsConstructor)
             {
                 CodeStatement statement =
@@ -265,8 +229,6 @@ namespace net.sf.jni4net.proxygen.generator
                                  (), "Env"));
                 tgtStatements.Add(statement);
             }
-            if (!(method.IsConstructor || method.IsVoid || fieldSetter))
-                tgtStatements.Add(new CodeVariableDeclarationStatement(method.ReturnType.CLRReference, "retval"));
             int framesize = (10+method.Parameters.Count*2);
             tgtStatements.Add(new CodeSnippetStatement("            using(new global::net.sf.jni4net.jni.LocalFrame(@__env, "+framesize+")){"));
         }
