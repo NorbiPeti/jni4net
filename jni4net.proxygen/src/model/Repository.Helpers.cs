@@ -141,6 +141,7 @@ namespace net.sf.jni4net.proxygen.model
             jvmPrimitives.Add(typeof(uint), Class.forName("java.lang.Integer"));
             jvmPrimitives.Add(typeof(ushort), Class.forName("java.lang.Short"));
             jvmPrimitives.Add(typeof(sbyte), Class.forName("java.lang.Byte"));
+            jvmPrimitives.Add(typeof(IntPtr), Class.forName("java.lang.Long"));
         }
 
         private static void BindKnownTypesPost()

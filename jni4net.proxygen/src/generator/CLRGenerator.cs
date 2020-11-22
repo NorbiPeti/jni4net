@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #endregion
 
+using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.IO;
@@ -316,7 +317,7 @@ namespace net.sf.jni4net.proxygen.generator
                 {
                     var member = m as CodeMemberPropertyEx;
                     if (member != null)
-                        if (member.Getter == method || member.Setter == method)
+                        if (member.Name == tgtProperty.Name)
                         {
                             tgtProperty = member;
                             add = false;
@@ -390,8 +391,11 @@ namespace net.sf.jni4net.proxygen.generator
             for (int i = 0; i < method.Parameters.Count; i++)
             {
                 var tgtParameter = new CodeParameterDeclarationExpression();
+                var param = method.Parameters[i];
                 tgtParameter.Name = method.ParameterNames[i];
-                tgtParameter.Type = method.Parameters[i].CLRInterfaceParameterReference;
+                tgtParameter.Type = param.CLRInterfaceParameterReference;
+                tgtParameter.Direction = param.IsOut ? FieldDirection.Out
+                    : param.IsRef ? FieldDirection.Ref : FieldDirection.In;
                 tgtMethod.Parameters.Add(tgtParameter);
             }
         }
@@ -560,8 +564,10 @@ namespace net.sf.jni4net.proxygen.generator
         private CodeMethodInvokeExpression CEEC2J(string prefix, GType paramType, CodeExpression invokeExpression)
         {
             CodeTypeReference[] par;
-            if (paramType.IsArray)
+            if (paramType.IsArray || paramType.IsOut || paramType.IsRef)
             {
+                if (!paramType.IsArray)
+                    paramType = paramType.MakeArray();
                 GType element = paramType.ArrayElement;
                 if (element.IsPrimitive)
                 {
@@ -575,7 +581,7 @@ namespace net.sf.jni4net.proxygen.generator
                 }
                 if (!element.IsInterface && !element.IsCLRRootType && element.IsCLRRealType)
                 {
-                    par = new[] {paramType.CLRReference, paramType.ArrayElement.CLRReference};
+                    par = new[] {paramType.CLRReference, element.CLRReference};
                     return CCE(prefix + "ArrayStrongC2Jp", par, invokeExpression, true);
                 }
                 if (!element.IsInterface && !element.IsJVMRootType && element.IsJVMRealType)
@@ -583,7 +589,7 @@ namespace net.sf.jni4net.proxygen.generator
                     par = new CodeTypeReference[] {};
                     return CCE(prefix + "ArrayStrongCp2J", par, invokeExpression, true);
                 }
-                par = new[] {paramType.CLRReference, paramType.ArrayElement.CLRReference};
+                par = new[] {paramType.CLRReference, element.CLRReference};
                 return CCE(prefix + "ArrayFullC2J", par, invokeExpression, true);
             }
             if (paramType.IsPrimitive)

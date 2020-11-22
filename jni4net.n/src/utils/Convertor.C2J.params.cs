@@ -141,6 +141,12 @@ namespace net.sf.jni4net.utils
             return res;
         }
 
+        public static Value ParArrayPrimC2J(JNIEnv env, uint[] value)
+        {
+            var res = new Value { _object = ArrayPrimC2J(env, value) };
+            return res;
+        }
+
         public static Value ParArrayPrimC2J(JNIEnv env, bool[] value)
         {
             var res = new Value { _object = ArrayPrimC2J(env, value) };
@@ -178,6 +184,12 @@ namespace net.sf.jni4net.utils
         }
 
         public static Value ParArrayPrimC2J(JNIEnv env, double[] value)
+        {
+            var res = new Value { _object = ArrayPrimC2J(env, value) };
+            return res;
+        }
+
+        public static Value ParArrayPrimC2J(JNIEnv env, IntPtr[] value)
         {
             var res = new Value { _object = ArrayPrimC2J(env, value) };
             return res;
